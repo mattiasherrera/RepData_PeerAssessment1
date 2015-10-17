@@ -254,3 +254,49 @@ The mean increased because when calculating the mean with the missing values, th
 The median didn't change much
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+###Data preprocesing - Add weekday and weekend to data
+Need to add day of the week first and then the tag weeday/weekend to the data with imputed values 
+
+
+```r
+##Adding day of the week to dataset
+datanomissing$Dayofweek <- weekdays(datanomissing$date)
+##Add a column to tag as weekday or weekend based on the day of the week
+datanomissing$type <- ifelse(datanomissing$Dayofweek == "Saturday" | datanomissing$Dayofweek == "Sunday", "Weekend", "Weekday")
+datanomissing$type <- as.factor(datanomissing$type)
+str(datanomissing)
+```
+
+```
+## 'data.frame':	17568 obs. of  6 variables:
+##  $ interval : int  0 0 0 0 0 0 0 0 0 0 ...
+##  $ steps    : num  1.72 0 0 0 0 ...
+##  $ date     : Date, format: "2012-10-01" "2012-11-23" ...
+##  $ x        : num  1.72 1.72 1.72 1.72 1.72 ...
+##  $ Dayofweek: chr  "Monday" "Friday" "Sunday" "Tuesday" ...
+##  $ type     : Factor w/ 2 levels "Weekday","Weekend": 1 1 2 1 2 1 2 1 1 2 ...
+```
+Summarize the data by type (weekday or weekend)and interval, taking the average
+
+```r
+##Summarize data, average steps by interval by type
+aggdatatype <-aggregate.data.frame(datanomissing$steps, by=list(type=datanomissing$type,interval=datanomissing$interval),FUN=mean, na.rm=TRUE)
+str(aggdatatype)
+```
+
+```
+## 'data.frame':	576 obs. of  3 variables:
+##  $ type    : Factor w/ 2 levels "Weekday","Weekend": 1 2 1 2 1 2 1 2 1 2 ...
+##  $ interval: int  0 0 5 5 10 10 15 15 20 20 ...
+##  $ x       : num  2.2512 0.2146 0.4453 0.0425 0.1732 ...
+```
+2 pane plot
+
+```r
+qplot(interval,x, data=aggdatatype,facets = .~type,geom = "line",ylab="Average steps",xlab="Interval")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-23-1.png) 
+
+Looks like during the weekend, the level of activity seems to be more constant, while during the week it tends to have a peak and then followed with a period of low activity

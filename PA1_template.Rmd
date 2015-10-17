@@ -146,3 +146,29 @@ The mean increased because when calculating the mean with the missing values, th
 The median didn't change much
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+###Data preprocesing - Add weekday and weekend to data
+Need to add day of the week first and then the tag weeday/weekend to the data with imputed values 
+
+```{r}
+##Adding day of the week to dataset
+datanomissing$Dayofweek <- weekdays(datanomissing$date)
+##Add a column to tag as weekday or weekend based on the day of the week
+datanomissing$type <- ifelse(datanomissing$Dayofweek == "Saturday" | datanomissing$Dayofweek == "Sunday", "Weekend", "Weekday")
+datanomissing$type <- as.factor(datanomissing$type)
+str(datanomissing)
+
+```
+Summarize the data by type (weekday or weekend)and interval, taking the average
+```{r}
+##Summarize data, average steps by interval by type
+aggdatatype <-aggregate.data.frame(datanomissing$steps, by=list(type=datanomissing$type,interval=datanomissing$interval),FUN=mean, na.rm=TRUE)
+str(aggdatatype)
+
+```
+2 pane plot
+```{r}
+qplot(interval,x, data=aggdatatype,facets = .~type,geom = "line",ylab="Average steps",xlab="Interval")
+```
+
+Looks like during the weekend, the level of activity seems to be more constant, while during the week it tends to have a peak and then followed with a period of lower activity
